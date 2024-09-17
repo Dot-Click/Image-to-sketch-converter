@@ -218,7 +218,9 @@
 
           try {
             // Send the POST request to the Flask API
-            const response = await fetch("http://localhost:5000/convert", {
+            let api_path = "https://image-to-sketch-converter.vercel.app/convert"
+            // let api_path = "http://localhost:5000/convert"
+            const response = await fetch(api_path, {
               method: "POST",
               body: formData,
             });
