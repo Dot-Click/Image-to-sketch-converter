@@ -8,6 +8,10 @@ from werkzeug.utils import secure_filename
 import logging
 from waitress import serve
 import uuid
+from image_models.model2 import model2
+from image_models.model3 import model3
+from image_models.model4 import model4
+from image_models.model5 import model5 
 
 app = Flask(__name__)
 # Enable CORS
@@ -113,25 +117,38 @@ def convert_image():
     sharpness = float(request.form.get('sharpness', 1.5))  # Default to '1.5'
     contrast = request.form.get('contrast', 'true').lower() == 'true'  # Default to 'True'
     brightness = int(request.form.get('brightness', 30))  # Default to '30'
-    
+    model = int(request.form.get('model', 1))  # Default to '30'
+    smoothness = int(request.form.get('smoothness', 5))  # Default smoothness value of 5
+
     # Step 1: Adjust sharpness
-    if sharpness > 0:
+    if sharpness > 0 & model ==1 :
         image = increase_sharpness(image, alpha=sharpness)
     
     # Step 2: Adjust contrast
-    if contrast:
+    if contrast & model ==1 :
         try:
             image = increase_contrast(image)
         except ValueError as e:
             return jsonify({"error": str(e)}), 400
     
     # Step 3: Adjust brightness
-    if brightness != 0:
+    if brightness != 0 & model ==1 :
         image = adjust_brightness(image, value=brightness)
+        
+    sketch_image = image
     
-    # Step 4: Apply sketching effect (edge detection)
-    sketch_image = apply_sketching(image, blur_value, canny_thresh1, canny_thresh2)
-    
+    if model == 1:
+       # Step 4: Apply sketching effect (edge detection)
+        sketch_image = apply_sketching(image, blur_value, canny_thresh1, canny_thresh2)
+      
+    elif model == 2:
+         sketch_image = model2(image, blur_value = 21)
+      
+    elif model == 3:
+         sketch_image = model3(image,smoothness=smoothness)
+      
+     
+   
     # Generate a unique identifier (UUID) for the output filename
     unique_id = str(uuid.uuid4())
     

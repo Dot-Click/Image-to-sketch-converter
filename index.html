@@ -82,14 +82,14 @@
     </style>
   </head>
   <body>
-    <div class="container-fluid">
+    <div class="container-fluid" >
       <div
         class="row"
-        style="box-shadow: 0px 0px 7px #d5cbcb; border-radius: 10px"
+        style="box-shadow: 0px 0px 7px #d5cbcb; border-radius: 10px;min-height: 100vh;"
       >
         <div class="col-md-4" style="background: #12326f">
           <form id="imageForm">
-            <div class="form-group w-100">
+            <div class="form-group w-100 mb-4">
               <label for="image">Select an image:</label>
               <input
                 type="file"
@@ -100,8 +100,15 @@
                 class="form-control"
               />
             </div>
-            <br />
-            <div class="form-group w-100">
+            <div class="form-group w-100 mb-4">
+              <label class="form-label" for="models"> Models </label>
+              <select class="form-control" id="models" name="models">
+                <option value="1">Model 1</option>
+                <option value="2">Model 2</option>
+                <option selected value="3">Model 3</option>
+              </select>
+            </div>
+            <div class="form-group modelControls w-100 modelinput1 mb-4">
               <label class="form-label" for="blur">
                 Blur Value:
                 <span
@@ -127,8 +134,7 @@
                 <output>5</output>
               </div>
             </div>
-            <br />
-            <div class="form-group w-100">
+            <div class="form-group w-100 modelControls modelinput1 mb-4">
               <label class="form-label" for="canny_thresh1">
                 Canny Threshold 1:
                 <span
@@ -150,8 +156,7 @@
                 <output>50</output>
               </div>
             </div>
-            <br />
-            <div class="form-group w-100">
+            <div class="form-group w-100 modelControls modelinput1 mb-4">
               <label class="form-label" for="canny_thresh2"
                 >Canny Threshold 2:
                 <span
@@ -175,8 +180,7 @@
                 <output>60</output>
               </div>
             </div>
-            <br />
-            <div class="form-group w-100">
+            <div class="form-group w-100 modelControls modelinput1 mb-4">
               <label class="form-label" for="brightness"> Brightness </label>
               <div class="d-flex gap-2">
                 <input
@@ -191,8 +195,7 @@
                 <output>30</output>
               </div>
             </div>
-            <br />
-            <div class="form-group w-100">
+            <div class="form-group w-100 modelControls modelinput1 mb-4">
               <label class="form-label" for="sharpness"> Sharpness </label>
               <div class="d-flex gap-2">
                 <input
@@ -208,8 +211,7 @@
                 <output>1.5</output>
               </div>
             </div>
-            <br />
-            <div class="form-group w-100">
+            <div class="form-group w-100 modelControls modelinput1 mb-4">
               <label class="form-label" for="contrast"> Contrast </label>
               <select class="form-control" id="contrast" name="contrast">
                 <option selected value="True">True</option>
@@ -217,6 +219,23 @@
               </select>
             </div>
 
+            <div class="form-group modelControls w-100 modelinput3 mb-4">
+              <label class="form-label" for="smoothness"> Smoothness: </label>
+              <div class="d-flex gap-2">
+                <input
+                  class="form-range"
+                  type="range"
+                  id="smoothness"
+                  name="smoothness"
+                  value="51"
+                  min="29"
+                  max="200"
+                  step="2"
+                  oninput="this.nextElementSibling.value = this.value"
+                />
+                <output>5</output>
+              </div>
+            </div>
             <!-- <button type="submit" id="submitbutton" class="btn btn-success">
         Convert Image
       </button> -->
@@ -333,6 +352,11 @@
     <script></script>
 
     <script>
+      jQuery(document).ready(function () {
+        const models = parseInt(document.getElementById("models").value);
+        $(".modelControls").hide();
+        $(`.modelinput${models}`).show();
+      });
       jQuery("#history").click(function () {
         jQuery(".current").hide();
         jQuery(".history").show();
@@ -344,7 +368,13 @@
       jQuery(document).on("click", ".help", function () {
         jQuery("#exampleModal").modal("show");
       });
+
       $(document).on("change", "input,select", function () {
+        const models = parseInt(document.getElementById("models").value);
+        $(".modelControls").hide();
+
+        $(`.modelinput${models}`).show();
+
         fetchFile();
       });
 
@@ -373,6 +403,8 @@
         const sharpness = document.getElementById("sharpness").value;
         const contrast = document.getElementById("contrast").value;
         const brightness = document.getElementById("brightness").value;
+        const models = document.getElementById("models").value;
+        const smoothness = document.getElementById("smoothness").value;
         const output_type = "image";
         // Append the form data
         formData.append("image", imageFile);
@@ -383,6 +415,8 @@
         formData.append("sharpness", sharpness);
         formData.append("contrast", contrast);
         formData.append("brightness", brightness);
+        formData.append("model", models);
+        formData.append("smoothness", smoothness);
 
         try {
           let api_path = " http://127.0.0.1:5000/";
