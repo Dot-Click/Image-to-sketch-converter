@@ -20,7 +20,7 @@
     />
     <link
       rel="stylesheet"
-      href="assets/css/jquery.jqZoom.css"
+      href="../static/assets/css/jquery.jqZoom.css"
       type="text/css"
     />
     <style>
@@ -343,12 +343,8 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     ></script>
-    <!-- <script
-      src="https://code.jquery.com/jquery-1.12.4.min.js"
-      integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ"
-      crossorigin="anonymous"
-    ></script> -->
-    <script src="assets/js/jquery.jqZoom.js"></script>
+   
+    <script src="../static/assets/js/jquery.jqZoom.js"></script>
     <script></script>
 
     <script>
@@ -419,7 +415,7 @@
         formData.append("smoothness", smoothness);
 
         try {
-          let api_path = " http://127.0.0.1:5000/";
+          let api_path = "http://127.0.0.1:5000/";
           const response = await fetch(`${api_path}convert`, {
             method: "POST",
             body: formData,
@@ -441,7 +437,7 @@
                             <i class="fa-regular fa-floppy-disk"></i>
                           </a>
                          <div>
-                        <img src="${result.output_file}" class="outputImage" />
+                        <img src="${api_path+result.output_file}" class="outputImage" />
                     
                   </div>`);
             //initializeMagnifier();

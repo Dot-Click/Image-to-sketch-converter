@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import os
 import cv2
@@ -18,19 +18,24 @@ app = Flask(__name__)
 CORS(app)
 
 app = Flask(__name__)
-
+@app.route('/')
+def index():
+  return render_template('index.html')
 # Enable CORS
 CORS(app)
 
+upload_folder = os.path.join('static', 'uploads') 
+ 
+app.config['UPLOAD'] = upload_folder
 # Configure the folder to save uploaded images temporarily
 UPLOAD_FOLDER = 'uploads'
 OUTPUT_FOLDER = 'outputs'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['OUTPUT_FOLDER'] = OUTPUT_FOLDER
+app.config['UPLOAD_FOLDER'] = upload_folder
+app.config['OUTPUT_FOLDER'] = upload_folder
 
 # Make sure upload and output folders exist
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+os.makedirs(upload_folder, exist_ok=True)
+os.makedirs(upload_folder, exist_ok=True)
 
 def convert_to_outline_svg(image_path, output_svg_path, blur_value, canny_thresh1, canny_thresh2):
     # Read the image
