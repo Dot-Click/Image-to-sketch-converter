@@ -415,8 +415,8 @@
         formData.append("smoothness", smoothness);
 
         try {
-          let api_path = "http://127.0.0.1:5000/";
-          const response = await fetch(`${api_path}convert`, {
+          let api_path = "";
+          const response = await fetch(`/convert`, {
             method: "POST",
             body: formData,
           });
