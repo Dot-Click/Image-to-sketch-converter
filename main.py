@@ -10,7 +10,7 @@ from waitress import serve
 import uuid
 from image_models.model2 import model2
 from image_models.model3 import model3
-from image_models.model4 import model4
+from image_models.model6 import model6
 from image_models.model5 import model5 
 
 app = Flask(__name__)
@@ -124,6 +124,8 @@ def convert_image():
     brightness = int(request.form.get('brightness', 30))  # Default to '30'
     model = int(request.form.get('model', 1))  # Default to '30'
     smoothness = int(request.form.get('smoothness', 5))  # Default smoothness value of 5
+    denoise = bool(request.form.get('denoise',  False ))  # Default smoothness value of 5 
+    enhance_before_sketching = bool(request.form.get('enhance_before_sketching', False))  # Default smoothness value of 5 
 
     # Step 1: Adjust sharpness
     if sharpness > 0 & model ==1 :
@@ -144,13 +146,16 @@ def convert_image():
     
     if model == 1:
        # Step 4: Apply sketching effect (edge detection)
-        sketch_image = apply_sketching(image, blur_value, canny_thresh1, canny_thresh2)
+        sketch_image = apply_sketching(image, blur_value=blur_value, canny_thresh1=canny_thresh1, canny_thresh2=canny_thresh2)
       
     elif model == 2:
          sketch_image = model2(image, blur_value = 21)
       
     elif model == 3:
          sketch_image = model3(image,smoothness=smoothness)
+      
+    elif model == 6:
+         sketch_image = model6(image,smoothness=smoothness,denoise =denoise,enhance_before_sketching=enhance_before_sketching )
       
      
    
@@ -183,4 +188,5 @@ def convert_image():
         return jsonify({"error": "Invalid output type. Must be 'svg' or 'image'."}), 400
 
 if __name__ == '__main__':
-         serve(app, host="0.0.0.0", port=8080)
+        #  serve(app, host="0.0.0.0", port=8080)
+        app.run(debug=True)

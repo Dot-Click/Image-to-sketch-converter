@@ -78,14 +78,20 @@
         margin-top: 10px;
         border-radius: 5px;
         color: #fff;
+        display: flex;
+        justify-content: space-between;
       }
     </style>
   </head>
   <body>
-    <div class="container-fluid" >
+    <div class="container-fluid">
       <div
         class="row"
-        style="box-shadow: 0px 0px 7px #d5cbcb; border-radius: 10px;min-height: 100vh;"
+        style="
+          box-shadow: 0px 0px 7px #d5cbcb;
+          border-radius: 10px;
+          min-height: 100vh;
+        "
       >
         <div class="col-md-4" style="background: #12326f">
           <form id="imageForm">
@@ -106,6 +112,7 @@
                 <option value="1">Model 1</option>
                 <option value="2">Model 2</option>
                 <option selected value="3">Model 3</option>
+                <option selected value="6">Model 6</option>
               </select>
             </div>
             <div class="form-group modelControls w-100 modelinput1 mb-4">
@@ -219,7 +226,9 @@
               </select>
             </div>
 
-            <div class="form-group modelControls w-100 modelinput3 mb-4">
+            <div
+              class="form-group modelControls w-100 modelinput3 modelinput6 mb-4"
+            >
               <label class="form-label" for="smoothness"> Smoothness: </label>
               <div class="d-flex gap-2">
                 <input
@@ -228,14 +237,35 @@
                   id="smoothness"
                   name="smoothness"
                   value="51"
-                  min="29"
-                  max="200"
+                  min="19"
+                  max="300"
                   step="2"
                   oninput="this.nextElementSibling.value = this.value"
                 />
                 <output>5</output>
               </div>
             </div>
+            <div class="form-group w-100 modelControls modelinput6 mb-4">
+              <label class="form-label" for="denoise"> Noise </label>
+              <select class="form-control" id="denoise" name="denoise">
+                <option selected value="True">True</option>
+                <option value="False">False</option>
+              </select>
+            </div>
+            <div class="form-group w-100 modelControls modelinput6 mb-4">
+              <label class="form-label" for="enhance_before_sketching">
+                Enhance before sketching
+              </label>
+              <select
+                class="form-control"
+                id="enhance_before_sketching"
+                name="enhance_before_sketching"
+              >
+                <option selected value="True">True</option>
+                <option value="False">False</option>
+              </select>
+            </div>
+
             <!-- <button type="submit" id="submitbutton" class="btn btn-success">
         Convert Image
       </button> -->
@@ -243,8 +273,13 @@
         </div>
         <div class="col-md-8">
           <div class="header">
-            <button class="btn btn-primary" id="current">Current</button>
-            <button class="btn btn-primary" id="history">History</button>
+            <div>
+              <button class="btn btn-primary" id="current">Current</button>
+              <button class="btn btn-primary" id="history">History</button>
+            </div>
+            <div>
+              <p class="isloading" style="display: none;margin: 0;padding: 0 10px;">Loading...</p>
+            </div>
           </div>
           <div class="current">
             <div class="d-flex flex-column items-center">
@@ -273,9 +308,9 @@
                 style="width: 100%; display: flex; justify-content: center"
               >
                 <img
-                  src="${result.output_file}"
+                  src="../static/assets/Dummy_flag.png"
                   class="outputImage magnifing-img"
-                  style="width: fit-content"
+                  style="width: fit-content; min-height: 80vh"
                 />
               </div>
             </div>
@@ -343,7 +378,7 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     ></script>
-   
+
     <script src="../static/assets/js/jquery.jqZoom.js"></script>
     <script></script>
 
@@ -376,7 +411,7 @@
 
       $(function () {
         // Initialize magnifier on page load
-        initializeMagnifier();
+        //initializeMagnifier();
       });
 
       // Function to initialize the magnifier
@@ -391,6 +426,7 @@
 
       async function fetchFile() {
         // Get the form data
+        $(".isloading").show();
         const formData = new FormData();
         const imageFile = document.getElementById("image").files[0];
         const blurValue = document.getElementById("blur").value;
@@ -401,6 +437,10 @@
         const brightness = document.getElementById("brightness").value;
         const models = document.getElementById("models").value;
         const smoothness = document.getElementById("smoothness").value;
+        const enhance_before_sketching = document.getElementById(
+          "enhance_before_sketching"
+        ).value;
+        const denoise = document.getElementById("denoise").value;
         const output_type = "image";
         // Append the form data
         formData.append("image", imageFile);
@@ -413,6 +453,8 @@
         formData.append("brightness", brightness);
         formData.append("model", models);
         formData.append("smoothness", smoothness);
+        formData.append("enhance_before_sketching", enhance_before_sketching);
+        formData.append("denoise", denoise);
 
         try {
           let api_path = "";
@@ -424,6 +466,7 @@
           const result = await response.json();
 
           if (response.ok) {
+            $(".isloading").hide();
             // document.getElementById("submitbutton").innerHTML = "Convert Image";
             jQuery("#message").html("");
             $(".current").find("a").attr("href", result.output_file);
@@ -433,21 +476,27 @@
                    <div class="d-flex flex-column items-center" style="max-width:300px"> 
                         <div>
                           <p>${result.output_file}</p>
-                          <a class="btn btn-info" target="_blank" href="${result.output_file}" download>
+                          <a class="btn btn-info" target="_blank" href="${
+                            result.output_file
+                          }" download>
                             <i class="fa-regular fa-floppy-disk"></i>
                           </a>
                          <div>
-                        <img src="${api_path+result.output_file}" class="outputImage" />
+                        <img src="${
+                          api_path + result.output_file
+                        }" class="outputImage" />
                     
                   </div>`);
             //initializeMagnifier();
           } else {
+            $(".isloading").hide();
             // document.getElementById("submitbutton").innerHTML = "Try Again!";
             document.getElementById(
               "message"
             ).innerHTML = `Error: ${result.error}`;
           }
         } catch (error) {
+          $(".isloading").hide();
           // document.getElementById("submitbutton").innerHTML = "Try Again!";
           console.error("Error uploading image:", error);
           document.getElementById("message").innerHTML = "An error occurred.";
