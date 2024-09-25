@@ -1,10 +1,6 @@
 
 import cv2
-
-# Assuming the image has been loaded correctly
-
-# Assuming the image has been loaded correctly
-
+ 
 def model3(image, smoothness=5):
     # Check if the image has 3 or 4 channels before converting
     if len(image.shape) == 3 and image.shape[2] == 3:

@@ -108,11 +108,14 @@
             </div>
             <div class="form-group w-100 mb-4">
               <label class="form-label" for="models"> Models </label>
-              <select class="form-control" id="models" name="models">
-                <option value="1">Model 1</option>
-                <option value="2">Model 2</option>
-                <option selected value="3">Model 3</option>
-                <option selected value="6">Model 6</option>
+              <select class="form-control" id="models" name="model">
+                <option value="1">Model 1 (First Sketching model)</option>
+                <option value="3">
+                  Model 3 (Simple Sketching + Smoothness controller)
+                </option>
+                <option selected value="6">
+                  Latest: Model 6 (Smoothness,Denoise and Sigam Filter)
+                </option>
               </select>
             </div>
             <div class="form-group modelControls w-100 modelinput1 mb-4">
@@ -178,7 +181,7 @@
                 <input
                   type="range"
                   id="canny_thresh2"
-                  name="canny_thresh2"
+                  name="cannythresh2"
                   value="60"
                   class="form-range"
                   max="150"
@@ -242,28 +245,42 @@
                   step="2"
                   oninput="this.nextElementSibling.value = this.value"
                 />
-                <output>5</output>
+                <output>51</output>
               </div>
             </div>
             <div class="form-group w-100 modelControls modelinput6 mb-4">
               <label class="form-label" for="denoise"> Noise </label>
-              <select class="form-control" id="denoise" name="denoise">
-                <option selected value="True">True</option>
-                <option value="False">False</option>
-              </select>
+              <div class="d-flex gap-2">
+                <input
+                  class="form-range"
+                  type="range"
+                  id="denoise"
+                  name="denoise"
+                  value="5"
+                  min="1"
+                  max="100"
+                  step="2"
+                  oninput="this.nextElementSibling.value = this.value"
+                />
+                <output>5</output>
+              </div>
             </div>
             <div class="form-group w-100 modelControls modelinput6 mb-4">
-              <label class="form-label" for="enhance_before_sketching">
-                Enhance before sketching
-              </label>
-              <select
-                class="form-control"
-                id="enhance_before_sketching"
-                name="enhance_before_sketching"
-              >
-                <option selected value="True">True</option>
-                <option value="False">False</option>
-              </select>
+              <label class="form-label" for="sigmaColor"> Sigma Color </label>
+              <div class="d-flex gap-2">
+                <input
+                  class="form-range"
+                  type="range"
+                  id="sigmaColor"
+                  name="sigmaColor"
+                  value="75"
+                  min="1"
+                  max="300"
+                  step="2"
+                  oninput="this.nextElementSibling.value = this.value"
+                />
+                <output>75</output>
+              </div>
             </div>
 
             <!-- <button type="submit" id="submitbutton" class="btn btn-success">
@@ -278,7 +295,12 @@
               <button class="btn btn-primary" id="history">History</button>
             </div>
             <div>
-              <p class="isloading" style="display: none;margin: 0;padding: 0 10px;">Loading...</p>
+              <p
+                class="isloading"
+                style="display: none; margin: 0; padding: 0 10px"
+              >
+                Loading...
+              </p>
             </div>
           </div>
           <div class="current">
@@ -401,12 +423,10 @@
       });
 
       $(document).on("change", "input,select", function () {
-        const models = parseInt(document.getElementById("models").value);
+        const models = parseInt($("#models").val());
         $(".modelControls").hide();
-
         $(`.modelinput${models}`).show();
-
-        fetchFile();
+        fetchFile(this);
       });
 
       $(function () {
@@ -424,37 +444,38 @@
         });
       }
 
-      async function fetchFile() {
+      async function fetchFile(element) {
+        const output_type = "image";
         // Get the form data
         $(".isloading").show();
-        const formData = new FormData();
-        const imageFile = document.getElementById("image").files[0];
-        const blurValue = document.getElementById("blur").value;
-        const cannyThresh1 = document.getElementById("canny_thresh1").value;
-        const cannyThresh2 = document.getElementById("canny_thresh2").value;
-        const sharpness = document.getElementById("sharpness").value;
-        const contrast = document.getElementById("contrast").value;
-        const brightness = document.getElementById("brightness").value;
-        const models = document.getElementById("models").value;
-        const smoothness = document.getElementById("smoothness").value;
-        const enhance_before_sketching = document.getElementById(
-          "enhance_before_sketching"
-        ).value;
-        const denoise = document.getElementById("denoise").value;
-        const output_type = "image";
+        var formData = new FormData($(element).closest("form")[0]);
+        // const imageFile = document.getElementById("image").files[0];
+        // const blurValue = document.getElementById("blur").value;
+        // const cannyThresh1 = document.getElementById("canny_thresh1").value;
+        // const cannyThresh2 = document.getElementById("canny_thresh2").value;
+        // const sharpness = document.getElementById("sharpness").value;
+        // const contrast = document.getElementById("contrast").value;
+        // const brightness = document.getElementById("brightness").value;
+        // const models = document.getElementById("models").value;
+        // const smoothness = document.getElementById("smoothness").value;
+        // const enhance_before_sketching = document.getElementById(
+        //   "enhance_before_sketching"
+        // ).value;
+        // const denoise = document.getElementById("denoise").value;
+
         // Append the form data
-        formData.append("image", imageFile);
-        formData.append("blur", blurValue);
-        formData.append("canny_thresh1", cannyThresh1);
-        formData.append("canny_thresh2", cannyThresh2);
-        formData.append("output_type", output_type);
-        formData.append("sharpness", sharpness);
-        formData.append("contrast", contrast);
-        formData.append("brightness", brightness);
-        formData.append("model", models);
-        formData.append("smoothness", smoothness);
-        formData.append("enhance_before_sketching", enhance_before_sketching);
-        formData.append("denoise", denoise);
+        // formData.append("image", imageFile);
+        // formData.append("blur", blurValue);
+        // formData.append("canny_thresh1", cannyThresh1);
+        // formData.append("canny_thresh2", cannyThresh2);
+        // formData.append("output_type", output_type);
+        // formData.append("sharpness", sharpness);
+        // formData.append("contrast", contrast);
+        // formData.append("brightness", brightness);
+        // formData.append("model", models);
+        // formData.append("smoothness", smoothness);
+        // formData.append("enhance_before_sketching", enhance_before_sketching);
+        // formData.append("denoise", denoise);
 
         try {
           let api_path = "";
@@ -473,7 +494,7 @@
             $(".current").find("img").attr("src", result.output_file);
             $(".current").find(".file-name").text(result.output_file);
             jQuery(".history").prepend(`
-                   <div class="d-flex flex-column items-center" style="max-width:300px"> 
+                   <div class="d-flex flex-column items-center" style="max-width:300px">
                         <div>
                           <p>${result.output_file}</p>
                           <a class="btn btn-info" target="_blank" href="${
@@ -485,7 +506,7 @@
                         <img src="${
                           api_path + result.output_file
                         }" class="outputImage" />
-                    
+
                   </div>`);
             //initializeMagnifier();
           } else {
