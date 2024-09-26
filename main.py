@@ -94,11 +94,19 @@ def adjust_brightness(image, value=30):
 
 # Function to apply sketching (Canny edge detection)
 def apply_sketching(image, blur_value, canny_thresh1, canny_thresh2):
-    """Applies edge detection to create a sketch-like effect."""
+    
+    # Apply Gaussian blur to reduce noise and improve edge detection
     blurred_image = cv2.GaussianBlur(image, (blur_value, blur_value), 0)
-    edges = cv2.Canny(blurred_image, canny_thresh1, canny_thresh2)
-    edges = cv2.bitwise_not(edges)
-    return edges
+
+    # Use Canny Edge Detection to detect the outlines
+    edges = cv2.Canny(blurred_image, threshold1=canny_thresh1, threshold2=canny_thresh2)
+
+    # Optionally, invert the edges to make them white on a black background
+    inverted_edges = cv2.bitwise_not(edges)
+
+    # Display the result using matplotlib
+     
+    return inverted_edges
 
 
 @app.route("/convert", methods=["POST"])
@@ -134,14 +142,14 @@ def convert_image():
         request.form.get("contrast", "true").lower() == "true"
     )  # Default to 'True'
     brightness = int(request.form.get("brightness", 30))  # Default to '30'
-    model = int(request.form.get("model", 1))  # Default to '30'
+    model = int(request.form.get("model"))  # Default to '30'
     smoothness = int(request.form.get("smoothness", 5))  # Default smoothness value of 5
     denoise = int(request.form.get("denoise",  5))  # Default smoothness value of 5
     sigmaColor = int(
         request.form.get("sigmaColor", 75)
     )  # Default smoothness value of 5
    
-    if denoise >= 2 or sigmaColor >= 2:
+    if denoise >= 2 and sigmaColor >= 2 and model == 6:
         image = cv2.bilateralFilter(image, denoise, sigmaColor, sigmaColor)
      
     # Step 1: Adjust sharpness
@@ -184,50 +192,30 @@ def convert_image():
 
     elif model == 3:
         print("model 3")
-        sketch_image = model3(image, smoothness=smoothness)
+        sketch_image = model3(image, smoothness=smoothness,remove_noise='black')
 
     # Generate a unique identifier (UUID) for the output filename
     unique_id = str(uuid.uuid4())
 
-    if output_type == "svg":
-        # Set the output file path for SVG
-        output_svg_filename = f"{os.path.splitext(filename)[0]}_{unique_id}_outline.svg"
-        output_svg_path = os.path.join(app.config["OUTPUT_FOLDER"], output_svg_filename)
+    # Set the output file path for image (e.g., PNG)
+    output_image_filename = (
+        f"{os.path.splitext(filename)[0]}_{unique_id}_outline.png"
+    )
+    output_image_path = os.path.join(
+        app.config["OUTPUT_FOLDER"], output_image_filename
+    )
 
-        # Convert to SVG (assuming a function exists)
-        convert_to_outline_svg(
-            image_path, output_svg_path, blur_value, canny_thresh1, canny_thresh2
-        )
+    # Save the sketch image
+    cv2.imwrite(output_image_path, sketch_image)
 
-        # Return the path to the output file
-        return jsonify(
-            {"message": "Image converted successfully.", "output_file": output_svg_path}
-        )
-
-    elif output_type == "image":
-        # Set the output file path for image (e.g., PNG)
-        output_image_filename = (
-            f"{os.path.splitext(filename)[0]}_{unique_id}_outline.png"
-        )
-        output_image_path = os.path.join(
-            app.config["OUTPUT_FOLDER"], output_image_filename
-        )
-
-        # Save the sketch image
-        cv2.imwrite(output_image_path, sketch_image)
-
-        # Return the path to the output file
-        return jsonify(
-            {
-                "message": "Image converted successfully.",
-                "output_file": output_image_path,
-            }
-        )
-
-    else:
-        return jsonify({"error": "Invalid output type. Must be 'svg' or 'image'."}), 400
-
+    # Return the path to the output file
+    return jsonify(
+        {
+            "message": "Image converted successfully.",
+            "output_file": output_image_path,
+        }
+    )
 
 if __name__ == "__main__":
-    serve(app, host="0.0.0.0", port=8080)
+     serve(app, host="0.0.0.0", port=8080)
     #app.run(debug=True)
